@@ -99,6 +99,15 @@ export class WhatsappController {
     const sheet = workbook.Sheets[sheetName];
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
+    const formattedNumbers = numbers.map((number) => {
+      number = String(number); 
+    
+      if (number.length > 12) {
+        number = number.slice(0, 5) + number.slice(6);
+      }
+    
+      return number;
+    });
 
     if (data.length === 0 || !data[0].hasOwnProperty('Número')) {
       throw new BadRequestException(
@@ -108,7 +117,7 @@ export class WhatsappController {
 
     await this.whatsappService.sendAllMessages(
       'message',
-      numbers,
+      formattedNumbers,
       body.message,
       file,
       body.name,
@@ -140,6 +149,15 @@ export class WhatsappController {
     const sheet = workbook.Sheets[sheetName];
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
+    const formattedNumbers = numbers.map((number) => {
+      number = String(number); 
+    
+      if (number.length > 12) {
+        number = number.slice(0, 5) + number.slice(6);
+      }
+    
+      return number;
+    });
 
     if (data.length === 0 || !data[0].hasOwnProperty('Número')) {
       throw new BadRequestException(
@@ -153,7 +171,7 @@ export class WhatsappController {
 
     await this.whatsappService.sendAllMessages(
       'media',
-      numbers,
+      formattedNumbers,
       body.message,
       image,
       body.name,
@@ -187,6 +205,16 @@ export class WhatsappController {
     const sheet = workbook.Sheets[sheetName];
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
+    const formattedNumbers = numbers.map((number) => {
+      number = String(number); 
+    
+      if (number.length > 12) {
+        number = number.slice(0, 5) + number.slice(6);
+      }
+    
+      return number;
+    });
+
 
     if (data.length === 0 || !data[0].hasOwnProperty('Número')) {
       throw new BadRequestException(
@@ -194,7 +222,7 @@ export class WhatsappController {
       );
     }
 
-    await this.whatsappService.sendAllMessages('media', numbers, '', image);
+    await this.whatsappService.sendAllMessages('media', formattedNumbers, '', image);
   }
 
   @Post('logout')

@@ -6,7 +6,7 @@ dotenv.config();
 
 async function getQrCode() {
   try {
-    const response = await axios.get(`http://localhost:1/whatsapp/qr-code`);
+    const response = await axios.get(`http://localhost:3001/whatsapp/qr-code`);
 
     return response.data
   } catch (error) {
