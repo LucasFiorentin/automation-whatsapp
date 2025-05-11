@@ -11,11 +11,7 @@ Antes de iniciar, certifique-se de que os seguintes itens estão instalados:
 O Node.js é necessário para rodar este projeto.
 
 Instruções:
-Acesse o site oficial: https://nodejs.org/
-
-Baixe a versão LTS (Long Term Support) recomendada para Windows.
-
-Execute o instalador e siga os passos padrão (recomenda-se deixar todas as opções como estão).
+Execute o instalador na pasta e siga os passos padrão (recomenda-se deixar todas as opções como estão).
 
 
 
