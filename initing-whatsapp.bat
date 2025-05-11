@@ -39,7 +39,7 @@ echo Iniciando aplicações...
 start "" /min cmd /c "cd /d backend-automation-whatsapp && npm run start:dev"
 
 :: Iniciar frontend minimizado
-start "" /min cmd /c "cd /d frontend-automation-whatsapp && npm run dev"
+start "" /min cmd /c "cd /d frontend-automation-whatsapp && npm run start"
 
 :: Aguardar frontend subir
 timeout /t 15 >nul
