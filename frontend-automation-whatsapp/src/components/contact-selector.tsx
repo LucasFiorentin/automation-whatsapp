@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -48,10 +48,6 @@ export function ContactSelector({ onContactsSelected }: ContactSelectorProps) {
       </div>
 
       <Tabs defaultValue="excel" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-1">
-          <TabsTrigger value="excel">Arquivo Excel</TabsTrigger>
-        </TabsList>
-
         <TabsContent value="excel" className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="excel-file">Arquivo Excel</Label>

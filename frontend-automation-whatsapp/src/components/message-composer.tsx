@@ -30,24 +30,26 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
   const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        setError("Por favor, selecione um arquivo de imagem válido.")
-        return
-      }
-
       setImage(file)
       setError(null)
-
+  
       const reader = new FileReader()
       reader.onload = (e) => {
-        setImagePreview(e.target?.result as string)
+        const result = e.target?.result as string
+        setImagePreview(result)
       }
-      reader.readAsDataURL(file)
+  
+      if (file.type === "application/pdf") {
+        reader.readAsDataURL(file)
+      } else {
+        reader.readAsDataURL(file)
+      }
     }
   }
+  
 
   const removeImage = () => {
     setImage(null)
@@ -66,12 +68,12 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
     }
 
     if (messageType === "image" && !image) {
-      setError("Por favor, selecione uma imagem.")
+      setError("Por favor, selecione um arquivo.")
       return
     }
 
     if (messageType === "text-image" && (!message.trim() || !image)) {
-      setError("Por favor, adicione tanto texto quanto imagem.")
+      setError("Por favor, adicione tanto texto quanto arquivo.")
       return
     }
 
@@ -103,8 +105,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
       <Tabs defaultValue="text" value={messageType} onValueChange={(value) => setMessageType(value as any)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="text">Apenas Texto</TabsTrigger>
-          <TabsTrigger value="image">Apenas Imagem</TabsTrigger>
-          <TabsTrigger value="text-image">Texto e Imagem</TabsTrigger>
+          <TabsTrigger value="image">Apenas Arquivo</TabsTrigger>
+          <TabsTrigger value="text-image">Texto e Arquivo</TabsTrigger>
         </TabsList>
 
         <TabsContent value="text" className="space-y-4 pt-4">
@@ -128,8 +130,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
 
         <TabsContent value="image" className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="image-upload">Selecione uma imagem</Label>
-            <Input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} />
+            <Label htmlFor="image-upload">Selecione um Arquivo</Label>
+            <Input id="image-upload" type="file" onChange={handleFileChange} />
           </div>
 
           {imagePreview && (
@@ -172,8 +174,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="combined-image">Selecione uma imagem</Label>
-            <Input id="combined-image" type="file" accept="image/*" onChange={handleImageChange} />
+            <Label htmlFor="combined-image">Selecione um arquivo</Label>
+            <Input id="combined-image" type="file" onChange={handleFileChange} />
           </div>
 
           {imagePreview && (
@@ -186,13 +188,24 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
               >
                 <X className="h-3 w-3 text-white" />
               </Button>
-              <Image
-                src={imagePreview}
-                alt="Preview"
-                width={400}
-                height={200}
-                className="max-h-[200px] mx-auto rounded-md"
-              />
+
+              {image?.type === "application/pdf" ? (
+                <iframe
+                  src={imagePreview}
+                  title="PDF Preview"
+                  width="100%"
+                  height="300"
+                  className="rounded-md"
+                />
+              ) : (
+                <Image
+                  src={imagePreview}
+                  alt="Preview"
+                  width={400}
+                  height={200}
+                  className="max-h-[200px] mx-auto rounded-md"
+                />
+              )}
             </div>
           )}
         </TabsContent>
@@ -216,8 +229,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
         {loading ? "Enviando..." : (
           <>
             {messageType === "text" && <><Send className="mr-2 h-4 w-4" />Enviar Mensagem</>}
-            {messageType === "image" && <><ImageIcon className="mr-2 h-4 w-4" />Enviar Imagem</>}
-            {messageType === "text-image" && <><FileImage className="mr-2 h-4 w-4" />Enviar Texto e Imagem</>}
+            {messageType === "image" && <><ImageIcon className="mr-2 h-4 w-4" />Enviar Arquivo</>}
+            {messageType === "text-image" && <><FileImage className="mr-2 h-4 w-4" />Enviar Texto e Arquivo</>}
           </>
         )}
       </Button>
