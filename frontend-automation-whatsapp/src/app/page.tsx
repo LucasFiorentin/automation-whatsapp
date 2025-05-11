@@ -68,7 +68,7 @@ export default function Page() {
           </div>
         </CardContent>
 
-        
+        <p className="text-[12px] p-2">By Jonatas Fiorentin</p>
       </Card>
     </main>
   )

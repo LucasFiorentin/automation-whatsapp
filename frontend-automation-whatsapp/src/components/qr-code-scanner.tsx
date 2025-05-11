@@ -78,7 +78,7 @@ export function QrCodeScanner({ onAuthenticated }: QrCodeScannerProps) {
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erro ao gerar QR Code</AlertTitle>
+            <AlertTitle>Erro ao gerar QR Code <br /> Reinicie a pagina</AlertTitle>
           </Alert>
         )}
 
