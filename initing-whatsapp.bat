@@ -21,6 +21,16 @@ if exist frontend-automation-whatsapp\node_modules (
     cd ..
 )
 
+if exist frontend-automation-whatsapp\.next (
+    echo Build do frontend já feito.
+) else (
+    echo Iniciando build do frontend...
+    cd /d frontend-automation-whatsapp
+    call npm run build
+    cd ..
+)
+
+
 echo.
 echo ✅ Verificação concluída!
 echo Iniciando aplicações...
