@@ -8,6 +8,8 @@ import { ContactSelector } from "@/components/contact-selector"
 import { MessageComposer } from "@/components/message-composer"
 import { Button } from "@/components/ui/button"
 import whatsappLogout from "@/services/whatsapp-logout/whatsapp-logout"
+import Image from "next/image"
+import logo from "../assets/logo.jpeg"
 
 export default function Page() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -40,17 +42,28 @@ export default function Page() {
   return (
     <main className="container mx-auto py-10 px-4">
       <Card className="max-w-4xl mx-auto relative">
-        <CardHeader>
-          <div className="w-full flex items-end justify-end">
-            <Button 
-              onClick={handleLogout} 
-              className="top-4 right-4 bg-red-500 hover:bg-red-600 text-white"
-            >
-              Logout
-            </Button>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Image
+              src={logo}
+              alt="Logo"
+              width={100}
+              height={100}
+              className="rounded"
+            />
+            <div>
+              <CardTitle className="text-xl">Envio Automático de Mensagens WhatsApp</CardTitle>
+              <CardDescription className="text-sm">
+                Envie mensagens para múltiplos contatos de forma automatizada
+              </CardDescription>
+            </div>
           </div>
-          <CardTitle className="text-2xl">Envio Automático de Mensagens WhatsApp</CardTitle>
-          <CardDescription>Envie mensagens para múltiplos contatos de forma automatizada</CardDescription>
+          <Button 
+            onClick={handleLogout} 
+            className="bg-red-500 hover:bg-red-600 text-white"
+          >
+            Logout
+          </Button>
         </CardHeader>
         <CardContent>
           <Stepper steps={steps} currentStep={currentStep} />
