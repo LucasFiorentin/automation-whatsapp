@@ -81,7 +81,13 @@ export class WhatsappController {
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   async sendMessagesFromExcelText(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { message: string; name: string | boolean },
+    @Body()
+    body: {
+      message: string;
+      name: string | boolean;
+      startDelay: number;
+      endDelay: number;
+    },
   ) {
     if (!file) {
       throw new BadRequestException('O arquivo Excel é obrigatório!');
@@ -100,12 +106,12 @@ export class WhatsappController {
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
     const formattedNumbers = numbers.map((number) => {
-      number = String(number); 
-    
+      number = String(number);
+
       if (number.length > 12) {
         number = number.slice(0, 5) + number.slice(6);
       }
-    
+
       return number;
     });
 
@@ -118,6 +124,8 @@ export class WhatsappController {
     await this.whatsappService.sendAllMessages(
       'message',
       formattedNumbers,
+      body.startDelay,
+      body.endDelay,
       body.message,
       file,
       body.name,
@@ -133,7 +141,13 @@ export class WhatsappController {
   async sendMessagesFromExcelMediaAndText(
     @UploadedFiles()
     files: { file?: Express.Multer.File[]; image?: Express.Multer.File[] },
-    @Body() body: { message: string; name: string | boolean },
+    @Body()
+    body: {
+      message: string;
+      name: string | boolean;
+      startDelay: number;
+      endDelay: number;
+    },
   ) {
     if (!files?.file || !files?.image) {
       throw new BadRequestException(
@@ -150,12 +164,12 @@ export class WhatsappController {
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
     const formattedNumbers = numbers.map((number) => {
-      number = String(number); 
-    
+      number = String(number);
+
       if (number.length > 12) {
         number = number.slice(0, 5) + number.slice(6);
       }
-    
+
       return number;
     });
 
@@ -172,6 +186,8 @@ export class WhatsappController {
     await this.whatsappService.sendAllMessages(
       'media',
       formattedNumbers,
+      body.startDelay,
+      body.endDelay,
       body.message,
       image,
       body.name,
@@ -190,6 +206,11 @@ export class WhatsappController {
       file?: Express.Multer.File[];
       image?: Express.Multer.File[];
     },
+    @Body()
+    body: {
+      startDelay: number;
+      endDelay: number;
+    },
   ) {
     if (!files?.file || !files?.image) {
       throw new BadRequestException(
@@ -206,15 +227,14 @@ export class WhatsappController {
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
     const numbers = data.map((number) => number['Número']);
     const formattedNumbers = numbers.map((number) => {
-      number = String(number); 
-    
+      number = String(number);
+
       if (number.length > 12) {
         number = number.slice(0, 5) + number.slice(6);
       }
-    
+
       return number;
     });
-
 
     if (data.length === 0 || !data[0].hasOwnProperty('Número')) {
       throw new BadRequestException(
@@ -222,7 +242,14 @@ export class WhatsappController {
       );
     }
 
-    await this.whatsappService.sendAllMessages('media', formattedNumbers, '', image);
+    await this.whatsappService.sendAllMessages(
+      'media',
+      formattedNumbers,
+      body.startDelay,
+      body.endDelay,
+      '',
+      image,
+    );
   }
 
   @Post('logout')

@@ -1,55 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+'use client'
 
-       
-
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Send, ImageIcon, AlertCircle, X, FileImage } from "lucide-react"
-import Image from "next/image"
-import { sendMessage } from "@/services/send-messages/send-messages"
-
-       
+import type React from 'react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Send, ImageIcon, AlertCircle, X, FileImage } from 'lucide-react'
+import Image from 'next/image'
+import { sendMessage } from '@/services/send-messages/send-messages'
 
 interface MessageComposerProps {
   contacts: File | null
 }
 
 export function MessageComposer({ contacts }: MessageComposerProps) {
-  const [messageType, setMessageType] = useState<"text" | "image" | "text-image">("text")
-  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState<
+    'text' | 'image' | 'text-image'
+  >('text')
+  const [message, setMessage] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const [startDelay, setStartDelay] = useState<number>(40)
+  const [endDelay, setEndDelay] = useState<number>(90)
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setImage(file)
       setError(null)
-  
+
       const reader = new FileReader()
       reader.onload = (e) => {
         const result = e.target?.result as string
         setImagePreview(result)
       }
-  
-      if (file.type === "application/pdf") {
+
+      if (file.type === 'application/pdf') {
         reader.readAsDataURL(file)
       } else {
         reader.readAsDataURL(file)
       }
     }
   }
-  
 
   const removeImage = () => {
     setImage(null)
@@ -58,22 +58,22 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
 
   const handleSend = async () => {
     if (!contacts) {
-      setError("Por favor, selecione um arquivo de contatos.")
+      setError('Por favor, selecione um arquivo de contatos.')
       return
     }
 
-    if (messageType === "text" && !message.trim()) {
-      setError("Por favor, digite uma mensagem.")
+    if (messageType === 'text' && !message.trim()) {
+      setError('Por favor, digite uma mensagem.')
       return
     }
 
-    if (messageType === "image" && !image) {
-      setError("Por favor, selecione um arquivo.")
+    if (messageType === 'image' && !image) {
+      setError('Por favor, selecione um arquivo.')
       return
     }
 
-    if (messageType === "text-image" && (!message.trim() || !image)) {
-      setError("Por favor, adicione tanto texto quanto arquivo.")
+    if (messageType === 'text-image' && (!message.trim() || !image)) {
+      setError('Por favor, adicione tanto texto quanto arquivo.')
       return
     }
 
@@ -82,14 +82,22 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
       setError(null)
       setSuccess(null)
 
-      await sendMessage(messageType, contacts, message, image, true)
+      await sendMessage(
+        messageType,
+        contacts,
+        message,
+        image,
+        true,
+        startDelay,
+        endDelay
+      )
 
-      setSuccess("Mensagens enviadas com sucesso!")
-      setMessage("")
+      setSuccess('Mensagens enviadas com sucesso!')
+      setMessage('')
       setImage(null)
       setImagePreview(null)
     } catch {
-      setError("Erro ao enviar mensagens.")
+      setError('Erro ao enviar mensagens.')
     } finally {
       setLoading(false)
     }
@@ -99,10 +107,16 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Componha sua mensagem</h3>
-        <p className="text-sm text-gray-500">Escolha o tipo de mensagem que deseja enviar</p>
+        <p className="text-sm text-gray-500">
+          Escolha o tipo de mensagem que deseja enviar
+        </p>
       </div>
 
-      <Tabs defaultValue="text" value={messageType} onValueChange={(value) => setMessageType(value as any)}>
+      <Tabs
+        defaultValue="text"
+        value={messageType}
+        onValueChange={(value) => setMessageType(value as any)}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="text">Apenas Texto</TabsTrigger>
           <TabsTrigger value="image">Apenas Arquivo</TabsTrigger>
@@ -120,8 +134,15 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
               className="min-h-[150px]"
             />
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Use {'name'} para personalizar a mensagem com o nome do contato</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => setMessage(message + "{name}")}>
+              <p className="text-xs text-gray-500">
+                Use {'name'} para personalizar a mensagem com o nome do contato
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setMessage(message + '{name}')}
+              >
                 Inserir {'name'}
               </Button>
             </div>
@@ -166,8 +187,15 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
               className="min-h-[100px]"
             />
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Use {'name'} para personalizar a mensagem com o nome do contato</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => setMessage(message + "{name}")}>
+              <p className="text-xs text-gray-500">
+                Use {'name'} para personalizar a mensagem com o nome do contato
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setMessage(message + '{name}')}
+              >
                 Inserir {'name'}
               </Button>
             </div>
@@ -175,7 +203,11 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
 
           <div className="space-y-2">
             <Label htmlFor="combined-image">Selecione um arquivo</Label>
-            <Input id="combined-image" type="file" onChange={handleFileChange} />
+            <Input
+              id="combined-image"
+              type="file"
+              onChange={handleFileChange}
+            />
           </div>
 
           {imagePreview && (
@@ -189,7 +221,7 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
                 <X className="h-3 w-3 text-white" />
               </Button>
 
-              {image?.type === "application/pdf" ? (
+              {image?.type === 'application/pdf' ? (
                 <iframe
                   src={imagePreview}
                   title="PDF Preview"
@@ -211,6 +243,29 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
         </TabsContent>
       </Tabs>
 
+      <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <Label htmlFor="start-delay">Intervalo de início (segundos)</Label>
+          <Input
+            id="start-delay"
+            type="number"
+            value={startDelay}
+            onChange={(e) => setStartDelay(Number(e.target.value))}
+            className="w-24"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="end-delay">Intervalo final (segundos)</Label>
+          <Input
+            id="end-delay"
+            type="number"
+            value={endDelay}
+            onChange={(e) => setEndDelay(Number(e.target.value))}
+            className="w-24"
+          />
+        </div>
+      </div>
+
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -226,11 +281,28 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
       )}
 
       <Button onClick={handleSend} disabled={loading} className="w-full">
-        {loading ? "Enviando..." : (
+        {loading ? (
+          'Enviando...'
+        ) : (
           <>
-            {messageType === "text" && <><Send className="mr-2 h-4 w-4" />Enviar Mensagem</>}
-            {messageType === "image" && <><ImageIcon className="mr-2 h-4 w-4" />Enviar Arquivo</>}
-            {messageType === "text-image" && <><FileImage className="mr-2 h-4 w-4" />Enviar Texto e Arquivo</>}
+            {messageType === 'text' && (
+              <>
+                <Send className="mr-2 h-4 w-4" />
+                Enviar Mensagem
+              </>
+            )}
+            {messageType === 'image' && (
+              <>
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Enviar Arquivo
+              </>
+            )}
+            {messageType === 'text-image' && (
+              <>
+                <FileImage className="mr-2 h-4 w-4" />
+                Enviar Texto e Arquivo
+              </>
+            )}
           </>
         )}
       </Button>
