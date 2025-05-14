@@ -2,9 +2,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Client, LocalAuth, MessageMedia } from 'whatsapp-web.js';
 import * as qrcode from 'qrcode';
 import * as qrcodeterminal from 'qrcode-terminal';
-import * as path from 'path';
-import { unlinkSync, rmdirSync } from 'fs';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class WhatsappService implements OnModuleInit {
@@ -37,12 +37,12 @@ export class WhatsappService implements OnModuleInit {
     this.client.on('disconnected', (reason) => {
       this.status = 'disconnected';
       this.logger.warn(`Desconectado do WhatsApp: ${reason}`);
-      this.qrCode = null; 
+      this.qrCode = null;
     });
   }
 
   private deleteAuthFolder() {
-    const authFolderPath = path.resolve(process.cwd(), '.wwebjs_auth');  
+    const authFolderPath = path.resolve(process.cwd(), '.wwebjs_auth');
     this.logger.log('Tentando excluir a pasta:', authFolderPath);
     try {
       if (fs.existsSync(authFolderPath)) {
@@ -55,17 +55,19 @@ export class WhatsappService implements OnModuleInit {
       this.logger.error('Erro ao excluir a pasta .wwebjs_auth:', error.message);
     }
   }
-  
+
   async logout() {
     await this.client.destroy();
-    this.deleteAuthFolder()
+    this.deleteAuthFolder();
     this.logger.log('Cliente WhatsApp desconectado!');
     this.qrCode = null;
-    
+
     try {
-      await this.client.initialize(); 
+      await this.client.initialize();
       this.logger.log('Cliente WhatsApp reconectado e pronto!');
-      return { message: 'Desconectado com sucesso, por favor escaneie o novo QR Code' };
+      return {
+        message: 'Desconectado com sucesso, por favor escaneie o novo QR Code',
+      };
     } catch (error) {
       this.logger.error('Erro ao reconectar o WhatsApp:', error);
     }
@@ -150,20 +152,73 @@ export class WhatsappService implements OnModuleInit {
   async sendAllMessages(
     type: 'media' | 'message',
     numbers: string[],
+    startDelay: number,
+    endDelay: number,
     message?: string,
     mediaFile?: Express.Multer.File,
     name?: string | boolean,
   ) {
+    const success: string[] = [];
+    const notRegistered: string[] = [];
+    const failed: { number: string; error: string }[] = [];
+
     for (const number of numbers) {
-      if (type === 'message') {
-        await this.sendMessage(number, message!, name);
-      } else if (type === 'media' && mediaFile) {
-        await this.sendMedia(number, mediaFile, message, name);
+      const jid = `${number}@c.us`;
+
+      try {
+        const isRegistered = await this.client.isRegisteredUser(jid);
+
+        if (!isRegistered) {
+          this.logger.warn(`Número não registrado no WhatsApp: ${number}`);
+          notRegistered.push(number);
+          continue;
+        }
+
+        if (type === 'message') {
+          await this.sendMessage(number, message!, name);
+          this.logger.log(`✅ Mensagem enviada para: ${number}`);
+        } else if (type === 'media' && mediaFile) {
+          await this.sendMedia(number, mediaFile, message, name);
+          this.logger.log(`✅ Mídia enviada para: ${number}`);
+        }
+
+        success.push(number);
+      } catch (error) {
+        this.logger.error(`❌ Erro ao enviar para ${number}: ${error.message}`);
+        failed.push({ number, error: error.message });
       }
 
-      const delay = Math.floor(Math.random() * 10000);
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const delay =
+        Math.floor(
+          Math.random() * (Number(endDelay) - Number(startDelay) + 1),
+        ) + Number(startDelay);
+
+      console.log(delay);
+
+      await new Promise((resolve) => setTimeout(resolve, delay * 1000));
     }
+
+    const logsDir = path.resolve(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir);
+    }
+
+    const logData = [
+      ['Status', 'Número', 'Erro (se houver)'],
+      ...success.map((n) => ['Sucesso', n, '']),
+      ...notRegistered.map((n) => ['Não registrado', n, '']),
+      ...failed.map((f) => ['Falha', f.number, f.error]),
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(logData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Envios');
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const excelPath = path.resolve(logsDir, `log-envio-${timestamp}.xlsx`);
+
+    XLSX.writeFile(wb, excelPath);
+    this.logger.log(`📄 Log de envio salvo em: ${excelPath}`);
   }
 
   getStatus(): string {
