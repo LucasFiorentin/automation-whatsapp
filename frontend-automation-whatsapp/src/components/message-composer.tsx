@@ -245,7 +245,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
 
       <div className="flex items-center gap-2">
         <div className="space-y-2">
-          <Label htmlFor="start-delay">Intervalo de início (segundos)</Label>
+          <Label htmlFor="start-delay">Intervalo de início</Label>
+          <p className="font-light text-sm">(segundos)</p>
           <Input
             id="start-delay"
             type="number"
@@ -255,7 +256,8 @@ export function MessageComposer({ contacts }: MessageComposerProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="end-delay">Intervalo final (segundos)</Label>
+          <Label htmlFor="end-delay">Intervalo final</Label>
+          <p className="font-light text-sm">(segundos)</p>
           <Input
             id="end-delay"
             type="number"
